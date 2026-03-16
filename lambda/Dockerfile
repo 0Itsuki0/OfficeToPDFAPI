@@ -1,4 +1,3 @@
-
 FROM debian:stable
 
 # If encountered「Could not connect to deb.debian.org:80 (151.101.110.132)」error,
@@ -108,7 +107,8 @@ WORKDIR /app
 # RUN mkdir -p ${FUNCTION_DIR}
 COPY package*.json ./
 
-RUN npm install --omit=dev
+# Install all deps (including dev) so tsc is available for build
+RUN npm install
 
 # Install the runtime interface client
 # https://docs.aws.amazon.com/lambda/latest/dg/nodejs-image.html#nodejs-image-clients
@@ -116,6 +116,9 @@ RUN npm install --omit=dev
 
 COPY . .
 RUN npm run build
+
+# Remove dev dependencies after build
+RUN npm prune --omit=dev
 
 # Expose the port application listens on
 # same as the PORT env above
